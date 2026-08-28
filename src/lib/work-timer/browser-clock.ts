@@ -24,7 +24,7 @@ export function installWorkTimerBrowserClock(
       .join(":");
   };
 
-  const updateClock = (element: HTMLElement) => {
+  const updateClock = (element: HTMLElement): boolean => {
     const valueElement = element.querySelector<HTMLElement>(
       "[data-work-timer-value]",
     );
@@ -39,7 +39,7 @@ export function installWorkTimerBrowserClock(
       || !Number.isFinite(baseline)
       || !Number.isFinite(resetAt)
     ) {
-      return;
+      return false;
     }
 
     const now = Date.now();
@@ -56,15 +56,26 @@ export function installWorkTimerBrowserClock(
       valueElement.textContent = nextText;
     }
     element.dataset.clockEnhanced = "true";
+    return status === "working";
   };
 
+  let intervalId: number | null = null;
   const updateAllClocks = () => {
+    let shouldTick = false;
     document.querySelectorAll<HTMLElement>("[data-work-timer-clock]")
-      .forEach(updateClock);
+      .forEach((element) => {
+        shouldTick = updateClock(element) || shouldTick;
+      });
+
+    if (shouldTick && intervalId === null) {
+      intervalId = window.setInterval(updateAllClocks, tickMilliseconds);
+    } else if (!shouldTick && intervalId !== null) {
+      window.clearInterval(intervalId);
+      intervalId = null;
+    }
   };
 
   updateAllClocks();
-  const intervalId = window.setInterval(updateAllClocks, tickMilliseconds);
   const observer = new MutationObserver(updateAllClocks);
   observer.observe(document.documentElement, {
     attributes: true,
@@ -81,7 +92,9 @@ export function installWorkTimerBrowserClock(
   document.addEventListener("visibilitychange", updateAllClocks);
 
   return () => {
-    window.clearInterval(intervalId);
+    if (intervalId !== null) {
+      window.clearInterval(intervalId);
+    }
     observer.disconnect();
     window.removeEventListener("pageshow", updateAllClocks);
     document.removeEventListener("visibilitychange", updateAllClocks);

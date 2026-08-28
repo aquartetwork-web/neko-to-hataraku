@@ -30,6 +30,15 @@ type WorkTimerCardProps = {
   nextAppDayStartMilliseconds: number;
 };
 
+export function getWorkTimerCardKey(snapshot: WorkTimerSnapshot): string {
+  return [
+    snapshot.session?.id ?? "no-session",
+    snapshot.status,
+    snapshot.workSegments.at(-1)?.id ?? "no-work-segment",
+    snapshot.breakSegments.at(-1)?.id ?? "no-break-segment",
+  ].join(":");
+}
+
 const STATUS_LABEL = {
   not_started: "未勤務",
   working: "勤務中",
@@ -68,6 +77,10 @@ export function WorkTimerCard({
   );
 
   useEffect(() => {
+    if (snapshot.status === "not_started" || snapshot.status === "clocked_out") {
+      return;
+    }
+
     const serverBase = Date.parse(snapshot.serverNow);
     const clientBase = Date.now();
     let animationFrameId = 0;
@@ -90,7 +103,7 @@ export function WorkTimerCard({
     animationFrameId = window.requestAnimationFrame(updateClock);
 
     return () => window.cancelAnimationFrame(animationFrameId);
-  }, [snapshot.serverNow]);
+  }, [snapshot.serverNow, snapshot.status]);
 
   const workedMilliseconds = calculateLiveDailyWorkedMilliseconds(
     dailyWorkedMillisecondsAtServerNow,

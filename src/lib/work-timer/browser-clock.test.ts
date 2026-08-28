@@ -43,4 +43,27 @@ describe("work timer browser clock", () => {
       "true",
     );
   });
+
+  it("clears its interval when refreshed attributes show clocked out", () => {
+    cleanup = installWorkTimerBrowserClock(1_000);
+    expect(vi.getTimerCount()).toBe(1);
+
+    const clock = document.querySelector<HTMLElement>("[data-work-timer-clock]");
+    if (!clock) {
+      throw new Error("work timer clock was not rendered");
+    }
+    clock.dataset.clockStatus = "clocked_out";
+    clock.dataset.clockBaseline = "8000";
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    expect(clock.querySelector("[data-work-timer-value]")).toHaveTextContent(
+      "00:00:08",
+    );
+    expect(vi.getTimerCount()).toBe(0);
+
+    vi.advanceTimersByTime(5_000);
+    expect(clock.querySelector("[data-work-timer-value]")).toHaveTextContent(
+      "00:00:08",
+    );
+  });
 });

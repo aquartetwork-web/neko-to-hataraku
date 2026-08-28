@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const REFRESH_DEBOUNCE_MILLISECONDS = 100;
+const LOG_PREFIX = "[work-timer realtime]";
 
 export function WorkTimerRealtimeRefresh() {
   const router = useRouter();
@@ -23,13 +24,22 @@ export function WorkTimerRealtimeRefresh() {
 
       refreshTimer = window.setTimeout(() => {
         refreshTimer = null;
+        console.info(`${LOG_PREFIX} router.refresh`);
         router.refresh();
       }, REFRESH_DEBOUNCE_MILLISECONDS);
+    };
+
+    const handleChange = (payload: { eventType: string; table: string }) => {
+      console.info(`${LOG_PREFIX} event ${payload.table}:${payload.eventType}`);
+      scheduleRefresh();
     };
 
     const subscribe = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (disposed || error || !data.user) {
+        if (!disposed) {
+          console.error(`${LOG_PREFIX} could not identify the signed-in user`, error);
+        }
         return;
       }
 
@@ -39,34 +49,40 @@ export function WorkTimerRealtimeRefresh() {
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "work_sessions", filter },
-          scheduleRefresh,
+          handleChange,
         )
         .on(
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "work_sessions", filter },
-          scheduleRefresh,
+          handleChange,
         )
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "work_segments", filter },
-          scheduleRefresh,
+          handleChange,
         )
         .on(
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "work_segments", filter },
-          scheduleRefresh,
+          handleChange,
         )
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "break_segments", filter },
-          scheduleRefresh,
+          handleChange,
         )
         .on(
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "break_segments", filter },
-          scheduleRefresh,
+          handleChange,
         )
-        .subscribe();
+        .subscribe((status, subscribeError) => {
+          if (status === "SUBSCRIBED") {
+            console.info(`${LOG_PREFIX} subscribed`);
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            console.error(`${LOG_PREFIX} ${status}`, subscribeError);
+          }
+        });
     };
 
     void subscribe();

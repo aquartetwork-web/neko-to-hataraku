@@ -1,6 +1,9 @@
 import { TodaySummary } from "@/components/reports/today-summary";
 import { TodayTodoCard } from "@/components/todo/today-todo-card";
-import { WorkTimerCard } from "@/components/work-timer/work-timer-card";
+import {
+  getWorkTimerCardKey,
+  WorkTimerCard,
+} from "@/components/work-timer/work-timer-card";
 import { WorkTimerRealtimeRefresh } from "@/components/work-timer/work-timer-realtime-refresh";
 import { Card, CardBody } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
@@ -78,6 +81,7 @@ export default async function HomePage() {
     <>
       <WorkTimerRealtimeRefresh />
       <WorkTimerCard
+        key={getWorkTimerCardKey(data.snapshot)}
         snapshot={data.snapshot}
         categories={data.reportBundle.categories}
         todos={data.reportBundle.todos}

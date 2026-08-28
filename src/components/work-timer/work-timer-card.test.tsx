@@ -66,4 +66,47 @@ describe("WorkTimerCard", () => {
 
     expect(screen.getByText("00:00:06", { exact: false })).toBeInTheDocument();
   });
+
+  it("applies refreshed clocked-out props and stops the animation clock", () => {
+    const rendered = render(
+      <WorkTimerCard
+        snapshot={snapshot}
+        categories={[]}
+        todos={[]}
+        dailyWorkedMillisecondsAtServerNow={5_000}
+        nextAppDayStartMilliseconds={SERVER_NOW + 12 * 60 * 60 * 1_000}
+      />,
+    );
+    const requestCountWhileWorking = vi.mocked(window.requestAnimationFrame).mock.calls.length;
+    const stoppedAt = SERVER_NOW + 3_000;
+    const clockedOutSnapshot: WorkTimerSnapshot = {
+      ...snapshot,
+      serverNow: new Date(stoppedAt).toISOString(),
+      session: snapshot.session
+        ? { ...snapshot.session, endedAt: new Date(stoppedAt).toISOString() }
+        : null,
+      workSegments: snapshot.workSegments.map((segment) => ({
+        ...segment,
+        endedAt: new Date(stoppedAt).toISOString(),
+      })),
+      status: "clocked_out",
+    };
+
+    rendered.rerender(
+      <WorkTimerCard
+        snapshot={clockedOutSnapshot}
+        categories={[]}
+        todos={[]}
+        dailyWorkedMillisecondsAtServerNow={8_000}
+        nextAppDayStartMilliseconds={SERVER_NOW + 12 * 60 * 60 * 1_000}
+      />,
+    );
+
+    expect(screen.getByText("本日の勤務終了")).toBeInTheDocument();
+    expect(screen.getByText("00:00:08", { exact: false })).toBeInTheDocument();
+    expect(window.cancelAnimationFrame).toHaveBeenCalledWith(1);
+    expect(window.requestAnimationFrame).toHaveBeenCalledTimes(
+      requestCountWhileWorking,
+    );
+  });
 });

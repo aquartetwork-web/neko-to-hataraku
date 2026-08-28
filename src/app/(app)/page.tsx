@@ -1,6 +1,7 @@
 import { TodaySummary } from "@/components/reports/today-summary";
 import { TodayTodoCard } from "@/components/todo/today-todo-card";
 import { WorkTimerCard } from "@/components/work-timer/work-timer-card";
+import { WorkTimerRealtimeRefresh } from "@/components/work-timer/work-timer-realtime-refresh";
 import { Card, CardBody } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -74,13 +75,16 @@ export default async function HomePage() {
       </CardBody>
     </Card>
   ) : (
-    <WorkTimerCard
-      snapshot={data.snapshot}
-      categories={data.reportBundle.categories}
-      todos={data.reportBundle.todos}
-      dailyWorkedMillisecondsAtServerNow={todayReport?.workedMilliseconds ?? 0}
-      nextAppDayStartMilliseconds={startOfAppDay(addAppDays(today, 1)).getTime()}
-    />
+    <>
+      <WorkTimerRealtimeRefresh />
+      <WorkTimerCard
+        snapshot={data.snapshot}
+        categories={data.reportBundle.categories}
+        todos={data.reportBundle.todos}
+        dailyWorkedMillisecondsAtServerNow={todayReport?.workedMilliseconds ?? 0}
+        nextAppDayStartMilliseconds={startOfAppDay(addAppDays(today, 1)).getTime()}
+      />
+    </>
   );
 
   return (

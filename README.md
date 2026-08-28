@@ -26,6 +26,10 @@ NEXT_PUBLIC_APP_NAME=ねことはたらく
 
 `NEXT_PUBLIC_SITE_URL` はローカルでは省略可能です。省略時はリクエスト元のoriginを使います。本番ではVercelの環境ごとに設定してください。service role keyは使用しません。
 
+NFC連携でもservice role keyは使用しません。PC側はpublishable keyと、
+NFC勤怠操作だけに権限を限定したデバイストークンを使用します。トークン本体は
+PCの`.env.nfc`だけに保存し、DBにはSHA-256ハッシュのみを登録します。
+
 ## 開発起動
 
 PowerShellの実行ポリシーによって `npm.ps1` が止まる環境では、以下のように `.cmd` を明示します。
@@ -70,6 +74,12 @@ Phase 2 migrationは、勤務開始・休憩・再開・退勤をPostgres Functi
 - ページ再読み込みや別端末からの表示時は、毎回Supabaseの状態を取得します。
 - RealtimeはPhase 2では使っていません。同時に開いた別端末は再読み込みまたはページ再訪で更新されます。
 - 18時間以上openな勤務セッションには退勤忘れの警告を表示します。終了時刻の修正UIは後続Phaseです。
+
+### NFCからの出勤・退勤
+
+`toggle_work_via_nfc` RPCは、登録済みのタグIDとデバイストークンを検証し、
+openな勤務セッションがなければ出勤、あれば退勤を実行します。ブラウザ用RPCと
+同じDB内部関数へ委譲するため、ロック、サーバー時刻、勤務区間の更新規則は共通です。
 
 ## Vercel
 

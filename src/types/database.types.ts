@@ -300,6 +300,14 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: string | null;
       };
+      toggle_work_via_nfc: {
+        Args: {
+          p_device_token: string;
+          p_event_id: string;
+          p_tag_id: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       category_color: "main" | "cyan" | "yellow" | "pink" | "purple" | "gray";

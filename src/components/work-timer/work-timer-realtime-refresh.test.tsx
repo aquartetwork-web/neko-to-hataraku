@@ -2,10 +2,8 @@ import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorkTimerRealtimeRefresh } from "@/components/work-timer/work-timer-realtime-refresh";
-import {
-  getWorkTimerCardKey,
-  WorkTimerCard,
-} from "@/components/work-timer/work-timer-card";
+import { WorkTimerCard } from "@/components/work-timer/work-timer-card";
+import { getWorkTimerCardKey } from "@/lib/work-timer/card-key";
 import type { WorkTimerSnapshot } from "@/lib/work-timer/types";
 
 const mocks = vi.hoisted(() => ({

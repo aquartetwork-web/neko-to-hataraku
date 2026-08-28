@@ -1,9 +1,6 @@
 import { TodaySummary } from "@/components/reports/today-summary";
 import { TodayTodoCard } from "@/components/todo/today-todo-card";
-import {
-  getWorkTimerCardKey,
-  WorkTimerCard,
-} from "@/components/work-timer/work-timer-card";
+import { WorkTimerCard } from "@/components/work-timer/work-timer-card";
 import { WorkTimerRealtimeRefresh } from "@/components/work-timer/work-timer-realtime-refresh";
 import { Card, CardBody } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
@@ -16,6 +13,7 @@ import {
 import { getReportBundle } from "@/lib/data/app-data";
 import { buildDailyReports } from "@/lib/reports/calculations";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { getWorkTimerCardKey } from "@/lib/work-timer/card-key";
 import { getWorkTimerSnapshot } from "@/lib/work-timer/data";
 
 export default async function HomePage() {

@@ -30,15 +30,6 @@ type WorkTimerCardProps = {
   nextAppDayStartMilliseconds: number;
 };
 
-export function getWorkTimerCardKey(snapshot: WorkTimerSnapshot): string {
-  return [
-    snapshot.session?.id ?? "no-session",
-    snapshot.status,
-    snapshot.workSegments.at(-1)?.id ?? "no-work-segment",
-    snapshot.breakSegments.at(-1)?.id ?? "no-break-segment",
-  ].join(":");
-}
-
 const STATUS_LABEL = {
   not_started: "未勤務",
   working: "勤務中",
